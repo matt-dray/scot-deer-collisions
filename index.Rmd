@@ -1,0 +1,233 @@
+---
+title: "Deer-vehicle collisions in Scotland, 2001 to 2017"
+output:
+  flexdashboard::flex_dashboard:
+    theme: cerulean
+    source_code: embed
+---
+
+```{r setup, include=FALSE, message=FALSE}
+library(flexdashboard)
+library(dplyr)
+library(stringr)
+library(janitor)
+library(sf)
+library(lubridate)
+library(crosstalk)
+library(leaflet)
+library(DT)
+
+# read and prep data
+dvc_read <- st_read(
+  "data/DVC_SCOTLAND_ESRI/DVC_SCOTLAND.shp",
+  stringsAsFactors = FALSE  # read factor columns as character
+) %>% 
+  st_transform(crs = 4326) %>%  # transform coords to latlong
+  clean_names() %>% mutate_if(is.character, tolower) %>% 
+  mutate(
+    inc_date = ymd(inc_date),  # convert to datetime
+    # clean up names
+    deer_speci = if_else(deer_speci == "desppnk", "unknown", deer_speci),
+    localautho = if_else(localautho == "perth & kinross", "perth_and_kinross", localautho),
+    road_no = if_else(road_no %in% c("unalloc", "notallocated", "notalloc", "u"), "unknown", road_no),
+    road_no = if_else(str_detect(road_no, "x") == TRUE, "unknown", road_no)
+  )
+
+# extract latlong cols from sf geometry and bind back to df
+dvc_xy <- as.data.frame(st_coordinates(dvc_read))
+dvc <- bind_cols(dvc_read, dvc_xy) %>% rename(latitude = X, longitude = Y)
+
+# create sample for testing
+dvc_sample <- sample_n(dvc, 100)
+
+# create shared data object for crosstalk
+# dvc_sd <- SharedData$new(dvc)
+dvc_sd <- SharedData$new(dvc_sample)
+```
+
+Explore {data-icon="ion-stats-bars"}
+=====================================  
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### Filters
+
+Where
+```{r}
+bscols(
+  filter_select(
+    id = "la",
+    label = "Local Authority",
+    sharedData = dvc_sd,
+    group = ~localautho
+  ),
+  filter_select(
+    id = "road",
+    label = "Road",
+    sharedData = dvc_sd,
+    group = ~road_no
+  )
+)
+```
+When
+```{r}
+bscols(
+  filter_select(
+    id = "year",
+    label = "Year",
+    sharedData = dvc_sd,
+    group = ~year
+  ),
+  filter_select(
+    id = "month",
+    label = "Month",
+    sharedData = dvc_sd,
+    group = ~inc_month
+  )
+)
+```
+What
+```{r}
+filter_select(
+  id = "species",
+  label = "Deer species",
+  sharedData = dvc_sd,
+  group = ~deer_speci
+)
+```
+
+### Interactive table
+
+```{r}
+dvc_sd %>% 
+  datatable(
+    filter = "top",  # allows filtering on each column
+    extensions = c(
+      "Buttons",  # add download buttons, etc
+      "Scroller"  # for scrolling down the rows rather than pagination
+    ),
+    rownames = FALSE,  # remove rownames
+    style = "bootstrap",
+    class = "compact",
+    width = "100%",
+    options = list(
+      dom = "Blrtip",  # specify content (search box, etc)
+      deferRender = TRUE,
+      scrollY = 300,
+      scroller = TRUE,
+      columnDefs = list(
+        list(
+          visible = FALSE,
+          targets = c(3, 7:11)
+        )
+      ), 
+      buttons = list(
+        I("colvis"),  # turn columns on and off
+        "csv",  # download as .csv
+        "excel"  # download as .xlsx
+      )
+    )
+  )
+```
+
+
+
+Column {data-width=700}
+-----------------------------------------------------------------------
+
+### Interactive map
+
+```{r}
+dvc_sd %>%
+  leaflet() %>% 
+  addProviderTiles(providers$OpenStreetMap) %>% 
+  addAwesomeMarkers(
+    icon = awesomeIcons(
+      # library = "fa",
+      # icon = "fa-car",
+      iconColor = "#FFFFFF",
+      markerColor = "darkblue",
+      # iconRotate = 20
+      text = case_when(
+        dvc_sample$year == "2000" ~ "00",
+        dvc_sample$year == "2001" ~ "01",
+        dvc_sample$year == "2002" ~ "02",
+        dvc_sample$year == "2003" ~ "03",
+        dvc_sample$year == "2004" ~ "04",
+        dvc_sample$year == "2005" ~ "05",
+        dvc_sample$year == "2006" ~ "06",
+        dvc_sample$year == "2007" ~ "07",
+        dvc_sample$year == "2008" ~ "08",
+        dvc_sample$year == "2009" ~ "09",
+        dvc_sample$year == "2010" ~ "10",
+        dvc_sample$year == "2011" ~ "11",
+        dvc_sample$year == "2012" ~ "12",
+        dvc_sample$year == "2013" ~ "13",
+        dvc_sample$year == "2014" ~ "14",
+        dvc_sample$year == "2015" ~ "15",
+        dvc_sample$year == "2016" ~ "16",
+        dvc_sample$year == "2017" ~ "17",
+        TRUE ~ "NA"
+        )
+      )
+    )
+```
+
+Information {data-orientation=rows data-icon="fa-info-circle"}
+===================================== 
+
+### 
+
+![](img/4798823254_16e045d325_o.jpg)
+
+### How to use
+
+#### Filters
+
+You can:
+
+* select one or more local authorities from the dropdown menu (remove them with your backspace key)
+* select one or more Ofsted grades using the checkboxes
+* select the phase of education with the checkboxes
+* drag the slider to select a pupil count
+* drag the slider to filter by the percenatge of pupils receiving free school meals
+
+#### Interactive map
+
+You can:
+
+* click to grab and drag the map around
+* zoom with the '+' and '--' buttons (top-left) or with your mouse's scroll wheel
+* click a marker to reveal a popup with information about that school
+* click the button showing a broken square (top-left under the zoom options) to select points on the map using a window that's draggable (click and hold the grid icon in the upper left) and resizeable (click and drag the white boxes in each corner)
+
+#### Interactive table
+
+You can:
+
+* filter each column by typing in the boxes under each column header
+* sort the columns (ascending and descending) by clicking on the column header
+* change which columns are visible by clicking the Column visibility button
+* click 'CSV' or 'Excel' to download the filtered data to a .csv file or a .xlsx
+* see how many entries remain after filtering in the bottom-left, where it says 'Showing X to Y of Z entries'
+
+### Notes
+
+#### Under construction
+
+This tool is under construction. Functionality is missing. The data are just a sample of the original dataset. This will be the case while the tool is in development.
+
+#### Tools
+
+[R v3.5.1](https://www.r-project.org/) and [RStudio v1.1.463](https://www.rstudio.com/) were used.
+
+Packages used were
+
+* [Flexdashboard](https://rmarkdown.rstudio.com/flexdashboard/) to create a frame for the content
+* [Leaflet](https://rstudio.github.io/leaflet/) for the interactive map
+* [DT](https://rstudio.github.io/DT/) for the interactive table
+* [Crosstalk](https://rstudio.github.io/crosstalk/) for widget interactivity
+* TODO: add more
+
+The code for this tool is available from [github.com/matt-dray/scot-deer-collision](https://github.com/matt-dray/scot-deer-collision).
