@@ -172,9 +172,9 @@ dvc_sd %>%
         )
     ),
     popup = ~paste0(
-      "<b>Date: ", dvc_sample$inc_date, "</b>",
-      "<b>LA: ", dvc_sample$localautho, "</b>",
-      "<b>Date: ", dvc_sample$road_no, "</b>"
+      "<br><b>Date</b>: ", dvc_sample$inc_date,
+      "<br><b>LA</b>: ", dvc_sample$localautho,
+      "<br><b>Road</b>: ", dvc_sample$road_no
     )
   )
 ```
