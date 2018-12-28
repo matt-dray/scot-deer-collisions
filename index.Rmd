@@ -2,8 +2,8 @@
 title: "Deer-vehicle collisions in Scotland, 2000 to 2017"
 output:
   flexdashboard::flex_dashboard:
-    theme: cerulean
-    source_code: embed
+    theme: bootstrap
+    source_code: "https://github.com/matt-dray/scot-deer-collisions"
 ---
 
 ```{r setup, include=FALSE, message=FALSE}
@@ -107,7 +107,7 @@ filter_select(
 ```{r}
 dvc_sd %>% 
   datatable(
-    filter = "top",  # allows filtering on each column
+    # filter = "top",  # allows filtering on each column
     extensions = c(
       "Buttons",  # add download buttons, etc
       "Scroller"  # for scrolling down the rows rather than pagination
