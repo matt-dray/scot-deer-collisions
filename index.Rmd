@@ -1,5 +1,5 @@
 ---
-title: "Deer-vehicle collisions in Scotland, 2001 to 2017"
+title: "Deer-vehicle collisions in Scotland, 2000 to 2017"
 output:
   flexdashboard::flex_dashboard:
     theme: cerulean
@@ -54,6 +54,7 @@ Column {data-width=400}
 ### Filters
 
 Where
+
 ```{r}
 bscols(
   filter_select(
@@ -70,7 +71,9 @@ bscols(
   )
 )
 ```
+
 When
+
 ```{r}
 bscols(
   filter_select(
@@ -87,7 +90,9 @@ bscols(
   )
 )
 ```
+
 What
+
 ```{r}
 filter_select(
   id = "species",
@@ -119,7 +124,7 @@ dvc_sd %>%
       columnDefs = list(
         list(
           visible = FALSE,
-          targets = c(3, 7:11)
+          targets = c(0, 1, 3:5, 9:15)
         )
       ), 
       buttons = list(
@@ -130,8 +135,6 @@ dvc_sd %>%
     )
   )
 ```
-
-
 
 Column {data-width=700}
 -----------------------------------------------------------------------
@@ -144,11 +147,8 @@ dvc_sd %>%
   addProviderTiles(providers$OpenStreetMap) %>% 
   addAwesomeMarkers(
     icon = awesomeIcons(
-      # library = "fa",
-      # icon = "fa-car",
       iconColor = "#FFFFFF",
       markerColor = "darkblue",
-      # iconRotate = 20
       text = case_when(
         dvc_sample$year == "2000" ~ "00",
         dvc_sample$year == "2001" ~ "01",
@@ -170,8 +170,13 @@ dvc_sd %>%
         dvc_sample$year == "2017" ~ "17",
         TRUE ~ "NA"
         )
-      )
+    ),
+    popup = ~paste0(
+      "<b>Date: ", dvc_sample$inc_date, "</b>",
+      "<b>LA: ", dvc_sample$localautho, "</b>",
+      "<b>Date: ", dvc_sample$road_no, "</b>"
     )
+  )
 ```
 
 Information {data-orientation=rows data-icon="fa-info-circle"}
