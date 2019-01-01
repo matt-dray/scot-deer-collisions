@@ -16,6 +16,7 @@ library(lubridate)
 library(crosstalk)
 library(leaflet)
 library(DT)
+library(tools)
 
 # read and prep data
 dvc_read <- st_read(
@@ -26,13 +27,31 @@ dvc_read <- st_read(
   clean_names() %>% mutate_if(is.character, tolower) %>% 
   mutate(
     inc_date = ymd(inc_date),  # convert to datetime
+    inc_month = case_when(
+      inc_month == 1 ~ "JAN",
+      inc_month == 2 ~ "FEB",
+      inc_month == 3 ~ "MAR",
+      inc_month == 4 ~ "APR",
+      inc_month == 5 ~ "MAY",
+      inc_month == 6 ~ "JUN",
+      inc_month == 7 ~ "JUL",
+      inc_month == 8 ~ "AUG",
+      inc_month == 9 ~ "SEP",
+      inc_month == 10 ~ "OCT",
+      inc_month == 11 ~ "NOV",
+      inc_month == 12 ~ "DEC",
+      TRUE ~ "NA"
+    ),
     # clean up names
     deer_speci = if_else(deer_speci == "desppnk", "unknown", deer_speci),
     localautho = if_else(localautho == "perth & kinross", "perth_and_kinross", localautho),
     road_no = if_else(road_no %in% c("unalloc", "notallocated", "notalloc", "u"), "unknown", road_no),
     road_no = if_else(str_detect(road_no, "x") == TRUE, "unknown", road_no)
-  )
-
+  ) %>% 
+  # final name clean
+  mutate(localautho = str_replace_all(localautho, "_", " ")) %>% 
+  mutate_at(vars(deer_speci, localautho, road_no), toTitleCase)
+  
 # extract latlong cols from sf geometry and bind back to df
 dvc_xy <- as.data.frame(st_coordinates(dvc_read))
 dvc <- bind_cols(dvc_read, dvc_xy) %>% rename(latitude = X, longitude = Y)
@@ -75,19 +94,11 @@ bscols(
 When
 
 ```{r}
-bscols(
-  filter_select(
-    id = "year",
-    label = "Year",
-    sharedData = dvc_sd,
-    group = ~year
-  ),
-  filter_select(
-    id = "month",
-    label = "Month",
-    sharedData = dvc_sd,
-    group = ~inc_month
-  )
+filter_select(
+  id = "month",
+  label = "Month",
+  sharedData = dvc_sd,
+  group = ~inc_month
 )
 ```
 
@@ -111,6 +122,22 @@ dvc_sd %>%
     extensions = c(
       "Buttons",  # add download buttons, etc
       "Scroller"  # for scrolling down the rows rather than pagination
+    ),
+    colnames = c(
+      "Object ID" = "objectid",  
+      "Reference" = "ref",       
+      "Date" = "inc_date",  
+      "OS 12-figure rference" = "os12figref",
+      "OS Easting" = "os_easting",
+      "OS Northing" = "os_northin",
+      "Deer species" = "deer_speci",
+      "Local Authority" = "localautho",
+      "Road number" = "road_no",   
+      "Year" = "year",      
+      "Month" = "inc_month", 
+      "Core or other source" = "coreorothe",
+      "GIS mapped" = "gis_mapped",
+      "Geometry" = "geometry"  
     ),
     rownames = FALSE,  # remove rownames
     style = "bootstrap",
@@ -149,28 +176,14 @@ dvc_sd %>%
     icon = awesomeIcons(
       iconColor = "#FFFFFF",
       markerColor = "darkblue",
-      text = case_when(
-        dvc_2017$inc_month == 1 ~ "JAN",
-        dvc_2017$inc_month == 2 ~ "FEB",
-        dvc_2017$inc_month == 3 ~ "MAR",
-        dvc_2017$inc_month == 4 ~ "APR",
-        dvc_2017$inc_month == 5 ~ "MAY",
-        dvc_2017$inc_month == 6 ~ "JUN",
-        dvc_2017$inc_month == 7 ~ "JUL",
-        dvc_2017$inc_month == 8 ~ "AUG",
-        dvc_2017$inc_month == 9 ~ "SEP",
-        dvc_2017$inc_month == 10 ~ "OCT",
-        dvc_2017$inc_month == 11 ~ "NOV",
-        dvc_2017$inc_month == 12 ~ "DEC",
-        TRUE ~ "NA"
-        )
+      text = dvc_2017$inc_month
     ),
     popup = ~paste0(
       "<br><b>Date</b>: ", dvc_2017$inc_date,
       "<br><b>LA</b>: ", dvc_2017$localautho,
-      "<br><b>Road</b>: ", dvc_2017$road_no
-    )#,
-    #clusterOptions = markerClusterOptions()
+      "<br><b>Road</b>: ", dvc_2017$road_no,
+      "<br><b>Species</b>: ", dvc_2017$deer_speci
+    )
   )
 ```
 
