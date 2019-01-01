@@ -1,12 +1,12 @@
 ---
-title: "Deer-vehicle collisions in Scotland, 2000 to 2017"
+title: "Deer-vehicle collisions in Scotland, 2017"
 output:
   flexdashboard::flex_dashboard:
-    theme: bootstrap
+    theme: cerulean
     source_code: "https://github.com/matt-dray/scot-deer-collisions"
 ---
 
-```{r setup, include=FALSE, message=FALSE}
+```{r setup,  include=FALSE, message=FALSE}
 library(flexdashboard)
 library(dplyr)
 library(stringr)
@@ -38,11 +38,11 @@ dvc_xy <- as.data.frame(st_coordinates(dvc_read))
 dvc <- bind_cols(dvc_read, dvc_xy) %>% rename(latitude = X, longitude = Y)
 
 # create sample for testing
-dvc_sample <- sample_n(dvc, 100)
+dvc_2017 <- filter(dvc, year == 2017)
 
 # create shared data object for crosstalk
 # dvc_sd <- SharedData$new(dvc)
-dvc_sd <- SharedData$new(dvc_sample)
+dvc_sd <- SharedData$new(dvc_2017)
 ```
 
 Explore {data-icon="ion-stats-bars"}
@@ -150,32 +150,27 @@ dvc_sd %>%
       iconColor = "#FFFFFF",
       markerColor = "darkblue",
       text = case_when(
-        dvc_sample$year == "2000" ~ "00",
-        dvc_sample$year == "2001" ~ "01",
-        dvc_sample$year == "2002" ~ "02",
-        dvc_sample$year == "2003" ~ "03",
-        dvc_sample$year == "2004" ~ "04",
-        dvc_sample$year == "2005" ~ "05",
-        dvc_sample$year == "2006" ~ "06",
-        dvc_sample$year == "2007" ~ "07",
-        dvc_sample$year == "2008" ~ "08",
-        dvc_sample$year == "2009" ~ "09",
-        dvc_sample$year == "2010" ~ "10",
-        dvc_sample$year == "2011" ~ "11",
-        dvc_sample$year == "2012" ~ "12",
-        dvc_sample$year == "2013" ~ "13",
-        dvc_sample$year == "2014" ~ "14",
-        dvc_sample$year == "2015" ~ "15",
-        dvc_sample$year == "2016" ~ "16",
-        dvc_sample$year == "2017" ~ "17",
+        dvc_2017$inc_month == 1 ~ "JAN",
+        dvc_2017$inc_month == 2 ~ "FEB",
+        dvc_2017$inc_month == 3 ~ "MAR",
+        dvc_2017$inc_month == 4 ~ "APR",
+        dvc_2017$inc_month == 5 ~ "MAY",
+        dvc_2017$inc_month == 6 ~ "JUN",
+        dvc_2017$inc_month == 7 ~ "JUL",
+        dvc_2017$inc_month == 8 ~ "AUG",
+        dvc_2017$inc_month == 9 ~ "SEP",
+        dvc_2017$inc_month == 10 ~ "OCT",
+        dvc_2017$inc_month == 11 ~ "NOV",
+        dvc_2017$inc_month == 12 ~ "DEC",
         TRUE ~ "NA"
         )
     ),
     popup = ~paste0(
-      "<br><b>Date</b>: ", dvc_sample$inc_date,
-      "<br><b>LA</b>: ", dvc_sample$localautho,
-      "<br><b>Road</b>: ", dvc_sample$road_no
-    )
+      "<br><b>Date</b>: ", dvc_2017$inc_date,
+      "<br><b>LA</b>: ", dvc_2017$localautho,
+      "<br><b>Road</b>: ", dvc_2017$road_no
+    )#,
+    #clusterOptions = markerClusterOptions()
   )
 ```
 
