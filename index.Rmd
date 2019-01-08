@@ -196,9 +196,11 @@ dvc_sd %>%
 Information {data-orientation=rows data-icon="fa-info-circle"}
 ===================================== 
 
-### Roe deer
+### Deer
 
-![Credit: Don Sutherland (CC BY-NC-ND 2.0)](img/4798823254_16e045d325_o.jpg)
+![](img/4798823254_16e045d325_o.jpg)
+
+[Roebuck by Don Sutherland](https://www.flickr.com/photos/snapperg/4798823254/) (CC BY-NC-ND 2.0)
 
 ### About
 
@@ -216,7 +218,7 @@ Warnings:
 
 #### How to use
 
-##### Filters (top-left pane of the interactives tab)
+##### Filters (top-left pane of the 'Explore' tab)
 
 From the dropdown menus in the filter section you can select one or more:
 
