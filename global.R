@@ -34,7 +34,16 @@ dvc_read <- st_read(
 
 # extract latlong cols from sf geometry and bind back to df
 dvc_xy <- as.data.frame(st_coordinates(dvc_read))
-dvc <- bind_cols(dvc_read, dvc_xy) %>% rename(latitude = X, longitude = Y)
+
+dvc <- bind_cols(
+  dvc_read,
+  dvc_xy
+) %>%
+  rename(latitude = X, longitude = Y)
 
 # create sample for testing
 dvc_sample <- sample_n(dvc, 200)
+
+# Save the objects
+# saveRDS(dvc, "data/dvc.RDS")
+# saveRDS(dvc_sample, "data/dvc_sample.RDS")
