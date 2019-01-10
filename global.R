@@ -34,18 +34,18 @@ dvc_read <- st_read(  # read geographic data
   mutate(
     inc_date = ymd(inc_date),  # convert to datetime
     inc_month = case_when(
-      inc_month == 1 ~ "JAN",
-      inc_month == 2 ~ "FEB",
-      inc_month == 3 ~ "MAR",
-      inc_month == 4 ~ "APR",
-      inc_month == 5 ~ "MAY",
-      inc_month == 6 ~ "JUN",
-      inc_month == 7 ~ "JUL",
-      inc_month == 8 ~ "AUG",
-      inc_month == 9 ~ "SEP",
-      inc_month == 10 ~ "OCT",
-      inc_month == 11 ~ "NOV",
-      inc_month == 12 ~ "DEC",
+      inc_month == 1 ~ "January",
+      inc_month == 2 ~ "February",
+      inc_month == 3 ~ "March",
+      inc_month == 4 ~ "April",
+      inc_month == 5 ~ "May",
+      inc_month == 6 ~ "June",
+      inc_month == 7 ~ "July",
+      inc_month == 8 ~ "August",
+      inc_month == 9 ~ "September",
+      inc_month == 10 ~ "October",
+      inc_month == 11 ~ "November",
+      inc_month == 12 ~ "December",
       TRUE ~ "NA"
     ),
     # clean up names (incomplete)

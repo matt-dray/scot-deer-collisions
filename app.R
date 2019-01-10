@@ -12,9 +12,10 @@ library(shinydashboard)  # layout
 library(leaflet)  # interactive map
 library(DT)  # interactive table
 library(dplyr)  # data manipulation
+library(sf)  # geography
 
 # Read pre-prepared data
-dvc <- readRDS("data/dvc_sample.RDS")
+dvc <- readRDS("data/dvc.RDS")
 
 
 # UI ----------------------------------------------------------------------
@@ -23,7 +24,8 @@ dvc <- readRDS("data/dvc_sample.RDS")
 ui <- dashboardPage(
     
     dashboardHeader(
-        title = "Deer-vehicle collisions in Scotland, 2000 to 2017"
+        title = "Deer-vehicle collisions in Scotland, 2000 to 2017",
+        titleWidth = 450
     ),  # end dashboardHeader
     
     dashboardSidebar(
@@ -31,48 +33,32 @@ ui <- dashboardPage(
             inputId = "input_year", 
             label = "Year",
             choices = unique(dvc$year),
-            multiple = TRUE
+            multiple = TRUE,
+            selected = sample(unique(dvc$year), 1)
         ),
         selectInput(
             inputId = "input_month", 
             label = "Month",
             choices = unique(dvc$inc_month),
-            multiple = TRUE
-        ),
-        dateRangeInput(
-            inputId = "input_daterange",
-            label = "Date range",
-            start = min(dvc$inc_date, na.rm = TRUE),
-            end = max(dvc$inc_date, na.rm = TRUE),
-            min = min(dvc$inc_date, na.rm = TRUE),
-            max = max(dvc$inc_date, na.rm = TRUE),
-            startview = "decade",
-            #weekstart = 1,
-            separator = " to "
+            multiple = TRUE,
+            selected = sample(unique(dvc$inc_month), 3)
         ),
         selectInput(
             inputId = "input_la", 
             label = "Local authority",
             choices = unique(dvc$localautho),
-            multiple = TRUE
-        ),
-        selectInput(
-            inputId = "input_road", 
-            label = "Road",
-            choices = unique(dvc$road_no),
-            multiple = TRUE
-        ),
-        selectInput(
-            inputId = "input_species", 
-            label = "Deer species",
-            choices = unique(dvc$deer_speci),
-            multiple = TRUE
+            multiple = TRUE,
+            selected = sample(unique(dvc$localautho), 5)
         )
     ),  # end dashboardSidebar
     
     dashboardBody(
+        tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
         fluidRow(
-            box(leafletOutput("output_map"), width = 12),  # full width
+            box(leafletOutput("output_map"), width = 12),
+            valueBoxOutput("output_valueselection"),
+            valueBoxOutput("output_valueyearla"),
+            valueBoxOutput("output_valueyear"),
             box(dataTableOutput("output_table"), width = 12)
         )
     )  # end dashboardBody
@@ -85,15 +71,46 @@ ui <- dashboardPage(
 
 server <- function(input, output) {
     
+    # Value box - year
+    output$output_valueyear <- renderValueBox({
+        shinydashboard::valueBox(
+            value = dvc %>% st_drop_geometry() %>% filter(year %in% input$input_year) %>% count() %>% pull(),
+            subtitle = "Collisions in selected year(s)",
+            icon = icon("calendar", lib = "font-awesome"),
+            color = "blue",
+            width = 4
+        )
+    })  # end of renderValueBox
+    
+    # Value box - year by la
+    output$output_valueyearla <- renderValueBox({
+        shinydashboard::valueBox(
+            value = dvc %>% st_drop_geometry() %>% filter(year %in% input$input_year, localautho %in% input$input_la) %>% count() %>% pull(),
+            subtitle = "Collisions in selected LA(s) in selected year(s)",
+            icon = icon("map", lib = "font-awesome"),
+            color = "blue",
+            width = 4
+        )
+    })  # end of renderValueBox
+    
+    # Value box - total in your selection
+    output$output_valueselection <- renderValueBox({
+        shinydashboard::valueBox(
+            value = dvc %>% st_drop_geometry() %>% filter(year %in% input$input_year, inc_month %in% input$input_month, localautho %in% input$input_la) %>% count() %>% pull(),
+            subtitle = "Collisions in your selection",
+            icon = icon("car-crash", lib = "font-awesome"),
+            color = "blue",
+            width = 4
+        )
+    })  # end of renderValueBox
+    
     # Interactive map with Leaflet
     output$output_map <- renderLeaflet({
         dvc %>%
             filter(
-                year %in% input$input_year
-                # inc_month %in% input$input_month,
-                # localautho %in% input$input_la,
-                # road_no %in% input$input_road,
-                # deer_speci %in% input$input$species
+                year %in% input$input_year,
+                inc_month %in% input$input_month,
+                localautho %in% input$input_la
             ) %>% 
             leaflet() %>% 
             addProviderTiles(providers$OpenStreetMap) %>% 
@@ -108,10 +125,20 @@ server <- function(input, output) {
     # Interactive map with Leaflet
     output$output_table <- renderDataTable({
         dvc %>% 
+            st_drop_geometry() %>% 
             filter(
-                year %in% input$input_year
+                year %in% input$input_year,
+                inc_month %in% input$input_month,
+                localautho %in% input$input_la
             ) %>% 
-            select(inc_date, year, inc_month, localautho, road_no, deer_speci) %>% 
+            select(
+                Date = inc_date,
+                Year = year,
+                Month = inc_month,
+                `Local authority` = localautho,
+                Road = road_no,
+                `Deer species` = deer_speci
+            ) %>% 
             datatable()
     })  # end of renderDataTable
     
