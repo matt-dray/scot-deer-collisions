@@ -15,7 +15,11 @@ library(dplyr)  # data manipulation
 library(sf)  # geography
 
 # Read pre-prepared data
-dvc <- readRDS("data/dvc.RDS")
+dvc <- readRDS("data/dvc.rds")
+
+# Month order for dropdown input
+mo_order <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun",
+           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 
 # UI ----------------------------------------------------------------------
@@ -32,21 +36,21 @@ ui <- dashboardPage(
         selectInput(
             inputId = "input_year", 
             label = "Year",
-            choices = unique(dvc$year),
+            choices = sort(unique(dvc$year)),
             multiple = TRUE,
             selected = sample(unique(dvc$year), 1)
         ),
         selectInput(
             inputId = "input_month", 
             label = "Month",
-            choices = unique(dvc$inc_month),
+            choices = unique(dvc$inc_month[order(match(dvc$inc_month, mo_order))]),
             multiple = TRUE,
             selected = sample(unique(dvc$inc_month), 3)
         ),
         selectInput(
             inputId = "input_la", 
             label = "Local authority",
-            choices = unique(dvc$localautho),
+            choices = sort(unique(dvc$localautho)),
             multiple = TRUE,
             selected = sample(unique(dvc$localautho), 5)
         )
@@ -87,7 +91,7 @@ server <- function(input, output) {
         shinydashboard::valueBox(
             value = dvc %>% st_drop_geometry() %>% filter(year %in% input$input_year, localautho %in% input$input_la) %>% count() %>% pull(),
             subtitle = "Collisions in selected LA(s) in selected year(s)",
-            icon = icon("map", lib = "font-awesome"),
+            icon = icon("map-o", lib = "font-awesome"),
             color = "blue",
             width = 4
         )
@@ -98,7 +102,7 @@ server <- function(input, output) {
         shinydashboard::valueBox(
             value = dvc %>% st_drop_geometry() %>% filter(year %in% input$input_year, inc_month %in% input$input_month, localautho %in% input$input_la) %>% count() %>% pull(),
             subtitle = "Collisions in your selection",
-            icon = icon("car-crash", lib = "font-awesome"),
+            icon = icon("car", lib = "font-awesome"),
             color = "blue",
             width = 4
         )
@@ -106,31 +110,49 @@ server <- function(input, output) {
     
     # Interactive map with Leaflet
     output$output_map <- renderLeaflet({
-        dvc %>%
-            filter(
-                year %in% input$input_year,
-                inc_month %in% input$input_month,
-                localautho %in% input$input_la
-            ) %>% 
-            leaflet() %>% 
-            addProviderTiles(providers$OpenStreetMap) %>% 
-            addAwesomeMarkers(
-                icon = awesomeIcons(
-                    iconColor = "#FFFFFF",
-                    markerColor = "darkblue"
-                )
-            )
+      dvc %>%
+        filter(
+          year %in% input$input_year,
+          inc_month %in% input$input_month,
+          localautho %in% input$input_la
+        ) %>% 
+        leaflet() %>% 
+        addProviderTiles(providers$OpenStreetMap) %>% 
+        addAwesomeMarkers(
+          icon = awesomeIcons(
+            icon = "fa-car",
+            iconColor = "#FFFFFF",
+            library = "fa",
+            markerColor = "darkblue"
+          ),
+          popup = ~paste0(
+            "<style>
+            td, th {
+              text-align: left;
+              padding: 3px;
+            }
+            </style>",
+            "<table>",
+            "<tr>","<td>", "Date", "</td>", "<td>", inc_date, "</td>", "<tr>",
+            "<tr>","<td>", "LA", "</td>", "<td>", localautho, "</td>", "<tr>",
+            "<tr>","<td>", "Road", "</td>", "<td>", road_no, "</td>", "<tr>",
+            "<tr>","<td>", "Species", "</td>", "<td>", deer_speci, "</td>", "<tr>",
+            "</table>"
+          )
+          
+          
+        )
     })  # end of renderLeaflet
-    
-    # Interactive map with Leaflet
-    output$output_table <- renderDataTable({
+      
+      # Interactive table with DT
+      output$output_table <- renderDataTable({
         dvc %>% 
-            st_drop_geometry() %>% 
+            st_drop_geometry() %>%
             filter(
                 year %in% input$input_year,
                 inc_month %in% input$input_month,
                 localautho %in% input$input_la
-            ) %>% 
+            ) %>%
             select(
                 Date = inc_date,
                 Year = year,
@@ -138,7 +160,7 @@ server <- function(input, output) {
                 `Local authority` = localautho,
                 Road = road_no,
                 `Deer species` = deer_speci
-            ) %>% 
+            ) %>%
             datatable()
     })  # end of renderDataTable
     
