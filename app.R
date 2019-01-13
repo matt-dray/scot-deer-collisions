@@ -52,7 +52,7 @@ ui <- dashboardPage(
             label = "Local authority",
             choices = sort(unique(dvc$localautho)),
             multiple = TRUE,
-            selected = sample(unique(dvc$localautho), 5)
+            selected = sample(unique(dvc$localautho), 3)
         )
     ),  # end dashboardSidebar
     
@@ -161,7 +161,33 @@ server <- function(input, output) {
                 Road = road_no,
                 `Deer species` = deer_speci
             ) %>%
-            datatable()
+            datatable(
+              
+              extensions = c("Scroller", "Buttons"),  # scroll instead of paginate
+              rownames = FALSE,  # remove row names
+              style = "bootstrap",  # style
+              width = "100%",  # full width
+              class = "compact",
+              options = list(
+                deferRender = TRUE,
+                # scroll
+                scrollY = 300,
+                scroller = TRUE,
+                # button
+                autoWidth = TRUE,  # column width consistent when making selections
+                dom = "Blfrtip",
+                buttons =
+                  list(
+                    list(
+                      extend = "collection",
+                      buttons = c("csv", "excel"),  # download extension options
+                      text = "Download"  # text to display
+                    )
+                  )
+              )
+              
+              
+            )
     })  # end of renderDataTable
     
 }  # end of server function
