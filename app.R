@@ -57,13 +57,16 @@ ui <- dashboardPage(
     ),  # end dashboardSidebar
     
     dashboardBody(
-        tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
         fluidRow(
-            box(leafletOutput("output_map"), width = 12),
-            valueBoxOutput("output_valueselection"),
-            valueBoxOutput("output_valueyearla"),
-            valueBoxOutput("output_valueyear"),
-            box(dataTableOutput("output_table"), width = 12)
+          valueBoxOutput("output_valueselection"),
+          valueBoxOutput("output_valueyearla"),
+          valueBoxOutput("output_valueyear"),
+          tabBox(
+            id = "tabset1",
+            width = 12,
+            tabPanel("Map", leafletOutput("output_map", height = "800px")),
+            tabPanel("Table", dataTableOutput("output_table"))
+          )
         )
     )  # end dashboardBody
     
@@ -139,55 +142,53 @@ server <- function(input, output) {
             "<tr>","<td>", "Species", "</td>", "<td>", deer_speci, "</td>", "<tr>",
             "</table>"
           )
+        )
+    })  # end of renderLeaflet
+    
+    # Interactive table with DT
+    output$output_table <- renderDataTable({
+      dvc %>% 
+        st_drop_geometry() %>%
+        filter(
+          year %in% input$input_year,
+          inc_month %in% input$input_month,
+          localautho %in% input$input_la
+        ) %>%
+        select(
+          Date = inc_date,
+          Year = year,
+          Month = inc_month,
+          `Local authority` = localautho,
+          Road = road_no,
+          `Deer species` = deer_speci
+        ) %>%
+        datatable(
+          filter = "top",
+          extensions = c("Scroller", "Buttons"),  # scroll instead of paginate
+          rownames = FALSE,  # remove row names
+          style = "bootstrap",  # style
+          width = "100%",  # full width
+          height = "800px",
+          options = list(
+            deferRender = TRUE,
+            # scroll
+            scrollY = 300,
+            scroller = TRUE,
+            # button
+            autoWidth = TRUE,  # column width consistent when making selections
+            dom = "Blrtip",
+            buttons =
+              list(
+                list(
+                  extend = "collection",
+                  buttons = c("csv", "excel"),  # download extension options
+                  text = "Download"  # text to display
+                )
+              )
+          )
           
           
         )
-    })  # end of renderLeaflet
-      
-      # Interactive table with DT
-      output$output_table <- renderDataTable({
-        dvc %>% 
-            st_drop_geometry() %>%
-            filter(
-                year %in% input$input_year,
-                inc_month %in% input$input_month,
-                localautho %in% input$input_la
-            ) %>%
-            select(
-                Date = inc_date,
-                Year = year,
-                Month = inc_month,
-                `Local authority` = localautho,
-                Road = road_no,
-                `Deer species` = deer_speci
-            ) %>%
-            datatable(
-              
-              extensions = c("Scroller", "Buttons"),  # scroll instead of paginate
-              rownames = FALSE,  # remove row names
-              style = "bootstrap",  # style
-              width = "100%",  # full width
-              class = "compact",
-              options = list(
-                deferRender = TRUE,
-                # scroll
-                scrollY = 300,
-                scroller = TRUE,
-                # button
-                autoWidth = TRUE,  # column width consistent when making selections
-                dom = "Blfrtip",
-                buttons =
-                  list(
-                    list(
-                      extend = "collection",
-                      buttons = c("csv", "excel"),  # download extension options
-                      text = "Download"  # text to display
-                    )
-                  )
-              )
-              
-              
-            )
     })  # end of renderDataTable
     
 }  # end of server function
