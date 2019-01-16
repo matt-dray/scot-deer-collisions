@@ -13,6 +13,7 @@ library(leaflet)  # interactive map
 library(DT)  # interactive table
 library(dplyr)  # data manipulation
 library(sf)  # geography
+library(icon)  # for icons
 
 # Read pre-prepared data
 dvc <- readRDS("data/dvc.rds")
@@ -66,7 +67,23 @@ ui <- dashboardPage(
             width = 12,
             tabPanel("Map", leafletOutput("output_map", height = "800px")),
             tabPanel("Table", dataTableOutput("output_table"))
-          )
+          ),
+          shinydashboard::box(
+            title = "Data",
+            icon("database", lib = "font-awesome"), HTML("<a href='https://gateway.snh.gov.uk/natural-spaces/dataset.jsp?dsid=DVC'>Open data</a>"), HTML("<p>"),
+            icon("database", lib = "font-awesome"), HTML("<a href='https://github.com/matt-dray/scot-deer-collisions/tree/master/data'>Cleaned data</a>"),
+            width = 4
+            ),
+          shinydashboard::box(
+            title = "About",
+            icon("laptop", lib = "font-awesome"), HTML("<a href='https://https://www.rostrum.blog/'>Blogpost</a>"),
+            width = 4
+            ),
+          shinydashboard::box(
+            title = "Code",
+            icon("github"), HTML("<a href='https://github.com/matt-dray/scot-deer-collisions'>GitHub</a>"),
+            width = 4
+            )
         )
     )  # end dashboardBody
     
