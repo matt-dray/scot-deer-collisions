@@ -45,7 +45,7 @@ ui <- dashboardPage(
     HTML("<br>"),
     box(
       title = "About",
-      icon("laptop", lib = "font-awesome"), HTML("<a href='https://https://www.rostrum.blog/'>Blogpost</a>"), HTML("<br>"),
+      icon("laptop", lib = "font-awesome"), HTML("<a href='https://www.rostrum.blog/2019/01/18/deer-collisions/'>Blogpost</a>"), HTML("<br>"),
       icon("info-circle", lib = "font-awesome"), HTML("<a href='http://www.deercollisions.co.uk/'>Deer-Vehicle Collisions</a>"), HTML("<br>"),
       icon("info-circle", lib = "font-awesome"), HTML("<a href='http://www.thedeerinitiative.co.uk/'>The Deer Iniatiaive</a>"), HTML("<br>"),
       icon("database", lib = "font-awesome"), HTML("<a href='https://gateway.snh.gov.uk/natural-spaces/dataset.jsp?dsid=DVC'>Open data</a>"), HTML("<br>"),
