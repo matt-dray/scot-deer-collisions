@@ -87,6 +87,6 @@ dvc <- bind_cols(dvc_wrangle, dvc_xy) %>% rename(latitude = X, longitude = Y)
 # Save objects ------------------------------------------------------------
 
 
-saveRDS(dvc, "data/dvc.rds")
+saveRDS(dvc, "data/dvc.RDS")
 write.csv(dvc, "data/dvc.csv")
 # saveRDS(dvc_sample, "data/dvc_sample.RDS")

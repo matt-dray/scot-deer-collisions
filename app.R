@@ -16,11 +16,15 @@ library(sf)  # geography
 library(icon)  # for icons
 
 # Read pre-prepared data
-dvc <- readRDS("data/dvc.rds")
+dvc <- readRDS("data/dvc.RDS")
 
 # Month order for dropdown input
 mo_order <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun",
            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+crashIcons <- iconList(
+  crash = makeIcon("www/car-crash.svg", 18, 18)
+)
 
 
 # UI ----------------------------------------------------------------------
@@ -42,12 +46,28 @@ ui <- dashboardPage(
     box(
       title = "About",
       icon("laptop", lib = "font-awesome"), HTML("<a href='https://https://www.rostrum.blog/'>Blogpost</a>"), HTML("<br>"),
+      icon("info-circle", lib = "font-awesome"), HTML("<a href='http://www.deercollisions.co.uk/'>Deer-Vehicle Collisions</a>"), HTML("<br>"),
+      icon("info-circle", lib = "font-awesome"), HTML("<a href='http://www.thedeerinitiative.co.uk/'>The Deer Iniatiaive</a>"), HTML("<br>"),
       icon("database", lib = "font-awesome"), HTML("<a href='https://gateway.snh.gov.uk/natural-spaces/dataset.jsp?dsid=DVC'>Open data</a>"), HTML("<br>"),
       icon("database", lib = "font-awesome"), HTML("<a href='https://github.com/matt-dray/scot-deer-collisions/tree/master/data'>Cleaned data</a>"), HTML("<br>"),
       icon("github"), HTML("<a href='https://github.com/matt-dray/scot-deer-collisions'>GitHub</a>"),
       width = 12,
       background = "blue",
       collapsible = TRUE, collapsed = TRUE
+    ),
+    box(
+      title = "How to",
+      width = 12,
+      background = "blue",
+      collapsible = TRUE, collapsed = TRUE,
+      HTML("<ul>
+      <li>Select from the filters menu to update the map and table</li>
+      <li>The starting selections are randomised</li>
+      <li>The map and table are in separate tabs</li>
+      <li>You can zoom and drag the map around</li>
+      <li>Click a marker on the map for details</li>
+      <li>Filter and sort the table by column</li>
+      <li>You can download your selection with the 'Download' button</li></ul>")
     ),
     box(
       title = "Filters",
@@ -146,7 +166,7 @@ server <- function(input, output) {
       addProviderTiles(providers$OpenStreetMap) %>% 
       addAwesomeMarkers(
         icon = awesomeIcons(
-          icon = "fa-car",
+          icon = "exclamation-circle",
           iconColor = "#FFFFFF",
           library = "fa",
           markerColor = "darkblue"
