@@ -1,21 +1,31 @@
 # Deer-vehicle collisions in Scotland
 
 <!-- badges: start -->
+[![Project Status: Concept – Minimal or no implementation has been done yet, or the repository is only intended to be a limited example, demo, or proof-of-concept.](https://www.repostatus.org/badges/latest/concept.svg)](https://www.repostatus.org/#concept)
+![](https://img.shields.io/badge/Shiny-not_hosted-blue?style=flat&labelColor=white&logo=RStudio&logoColor=blue)
 [![Blog post](https://img.shields.io/badge/rostrum.blog-post-008900?labelColor=000000&logo=data%3Aimage%2Fgif%3Bbase64%2CR0lGODlhEAAQAPEAAAAAABWCBAAAAAAAACH5BAlkAAIAIf8LTkVUU0NBUEUyLjADAQAAACwAAAAAEAAQAAAC55QkISIiEoQQQgghRBBCiCAIgiAIgiAIQiAIgSAIgiAIQiAIgRAEQiAQBAQCgUAQEAQEgYAgIAgIBAKBQBAQCAKBQEAgCAgEAoFAIAgEBAKBIBAQCAQCgUAgEAgCgUBAICAgICAgIBAgEBAgEBAgEBAgECAgICAgECAQIBAQIBAgECAgICAgICAgECAQECAQICAgICAgICAgEBAgEBAgEBAgICAgICAgECAQIBAQIBAgECAgICAgIBAgECAQECAQIBAgICAgIBAgIBAgEBAgECAgECAgICAgICAgECAgECAgQIAAAQIKAAAh%2BQQJZAACACwAAAAAEAAQAAAC55QkIiESIoQQQgghhAhCBCEIgiAIgiAIQiAIgSAIgiAIQiAIgRAEQiAQBAQCgUAQEAQEgYAgIAgIBAKBQBAQCAKBQEAgCAgEAoFAIAgEBAKBIBAQCAQCgUAgEAgCgUBAICAgICAgIBAgEBAgEBAgEBAgECAgICAgECAQIBAQIBAgECAgICAgICAgECAQECAQICAgICAgICAgEBAgEBAgEBAgICAgICAgECAQIBAQIBAgECAgICAgIBAgECAQECAQIBAgICAgIBAgIBAgEBAgECAgECAgICAgICAgECAgECAgQIAAAQIKAAA7)](https://www.rostrum.blog/2019/01/18/deer-collisions/)
 <!-- badges: end -->
 
 
-A small R Shiny app for exploring geographic data about collisions between vehicles and deer in Scotland between 2000 and 2017. 
+A small R Shiny app for exploring geographic data about collisions between vehicles and deer in Scotland between 2000 and 2017. You can read more in [the accompanying blog post](https://www.rostrum.blog/2019/01/18/deer-collisions/).
 
 ![Gif preview of the app in action](https://media.giphy.com/media/ZvK6zz5E4agAL2gf6u/giphy.gif)
 
-## Where
+## Use
 
-Live Shiny app: https://mattdray.shinyapps.io/scot-deer-collisions/
+The app is not hosted online. You can clone or download this repo and then run the app, or you can run these lines from an R session:
 
-Blog about the app: https://www.rostrum.blog/2019/01/18/deer-collisions/
+``` r
+shiny::runGitHub(
+  repo = "scot-deer-collisions", 
+  username = "matt-dray"
+)
+```
 
-## What
+The app depends on a few packages: {shiny}, {shinydashboard}, {leaflet}, {DT}, {dplyr}, {sf} and {icon}.
+
+
+## Data
 
 From the blogpost:
 
